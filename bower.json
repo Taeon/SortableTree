@@ -1,0 +1,30 @@
+{
+  "name": "SortableTree",
+  "homepage": "https://github.com/Taeon/SortableTree",
+  "description": "Simple sortable, nestable list for JavaScript",
+  "main": "src/SortableTree.js",
+  "moduleType": [
+    "amd",
+    "es6",
+    "globals"
+  ],
+  "keywords": [
+    "javascript",
+    "sortable",
+    "sort",
+    "neatable",
+    "nested",
+    "tree"
+  ],
+  "authors": [
+    "Pat Fox"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
