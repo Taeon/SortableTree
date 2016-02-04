@@ -36,13 +36,20 @@
 }(
     this,
     function () {
+
+        var ClearUp = function( tree_object ){
+			$( tree_object.element ).find( '.sortable-tree-item-clone,.sortable-tree-children-clone ' ).remove();
+            $( tree_object.element ).find( 'li' ).removeClass( 'sortable-tree-is-selected sortable-tree-is-target sortable-tree-is-source sortable-tree-is-disabled' );
+        }
+
         // Constructor
         var S = function( element, option ){
             this.o = {
                 ev: 'click', // 'Click' event to listen for
                 el: 'li', // Parent element that will be moved
                 nestable: true,
-                id:'id'
+                id:'id',
+				button_target: false
             }
             for ( index in option ) {
 				this.o[ index ] = option[index];
@@ -64,7 +71,7 @@
                 var button = $('<div class="sortable-tree-button select">Move</div>');
 
                 // Prepend button to element
-                $( items[ i ] ).prepend( button );
+                $( items[ i ] ).find( this.o.button_target ).prepend( button );
             }
 
             // Bind click event
@@ -141,7 +148,7 @@
 				clone_after.find( '.sortable-tree-button.select' ).on( this.o.ev, $.proxy( this.InsertAfter, this ) );
 				
 				// Insert as child
-                if( this.o.nestable ){
+                if( this.o.nestable && !( source[0] == this.GetParent(this.current_item) ) ){
 					var clone_child = this.current_item.clone();
 					clone_child.find( '.sortable-tree-button.select' ).on( this.o.ev, $.proxy( this.InsertAsChild, this ) );
 					if ( $( source ).find( '> ul' ).length == 0 ) {
@@ -153,7 +160,7 @@
 				this.trigger( 'target-selected', {tree:this, item:this.current_item,target:source} );
             } else if( source.hasClass( 'sortable-tree-is-source' ) ) {
                 // Cancel move
-                this.ClearUp();
+                ClearUp( this );
                 this.trigger( 'cancelled', {tree:this, item:this.current_item} );
             } else {
 				// Select item to be moved
@@ -171,13 +178,31 @@
         
         S.prototype.InsertAfter = function( event ){
             this.current_item.insertAfter( $( this.element ).find( '.sortable-tree-is-selected' ) );
-            this.ClearUp();
-            this.trigger( 'moved', {tree:this, item:this.current_item} );
+			ClearUp( this );
+			var parent = this.GetParent( this.current_item );
+            this.trigger(
+				'moved',
+				{
+					tree:this,
+					item:this.current_item,
+					id:$(this.current_item).data( this.o.id ),
+					parent_id: (parent)?$(parent).data( this.o.id ):null
+				}
+			);
         }
         S.prototype.InsertBefore = function(  ){
             this.current_item.insertBefore( $( this.element ).find( '.sortable-tree-is-selected' ) );
-            this.ClearUp();
-            this.trigger( 'moved', {tree:this, item:this.current_item} );
+            ClearUp( this );
+			var parent = this.GetParent( this.current_item );
+            this.trigger(
+				'moved',
+				{
+					tree:this,
+					item:this.current_item,
+					id:$(this.current_item).data( this.o.id ),
+					parent_id: (parent)?$(parent).data( this.o.id ):null
+				}
+			);
         }
         S.prototype.InsertAsChild = function(){
             var child_list = $( this.element ).find( '.sortable-tree-is-selected' ).find( '> ul:not(.sortable-tree-children-clone)' );
@@ -187,15 +212,27 @@
             }
 
             child_list.append( this.current_item );
-            this.ClearUp();
-            this.trigger( 'moved', {tree:this, item:this.current_item} );
+            ClearUp( this );
+			var parent = this.GetParent( this.current_item );
+            this.trigger(
+				'moved',
+				{
+					tree:this,
+					item:this.current_item,
+					id:$(this.current_item).data( this.o.id ),
+					parent_id: (parent)?$(parent).data( this.o.id ):null
+				}
+			);
         }
+        /**
+         * Get the current list as an array, with structure
+         */
         S.prototype.GetStructure = function( target ){
-            if ( typeof target == 'undefined' ){
+            if ( typeof target == 'undefined' || target === null ){
 				target = this.element;
 			}
-            target = $(target);
-            var children = target.find( '> .sortable-tree-item' );
+	        target = $(target);
+	        var children = $( target ).find( '> .sortable-tree-item' );
             var structure = [];
             for ( var i = 0; i < children.length; i++ ) {
                 var child = {
@@ -208,27 +245,27 @@
 			}
             return structure;
         }
+		S.prototype.GetParent = function( element ){
+			var parent = $( element ).parent().closest( '.sortable-tree-item' );
+			return (parent.length>0)?parent[0]:null;
+		}
 		/**
-		 * Get a list of all elements with their parent ID
+		 * Get a flat list of all elements with their parent ID
 		 */
 		S.prototype.GetParentList = function(){
 			var parent_list = [];
 			var items = $( this.element ).find( '.sortable-tree-item' );
 			for ( var i = 0; i < items.length; i++ ) {
-				var parent = $( items[ i ] ).parent().closest( '.sortable-tree-item' );
+				var parent = this.GetParent( items[ i ] );
 				parent_list.push(
 					{
 						id: $( items[ i ] ).data( this.o.id ),
-						parent_id: (parent.length>0)?parent.data( this.o.id ):null
+						parent_id: (parent)?$(parent).data( this.o.id ):null
 					}
 				);
 			}
 			return parent_list;
 		}
-        S.prototype.ClearUp = function(){
-			$( this.element ).find( '.sortable-tree-item-clone,.sortable-tree-children-clone ' ).remove();
-            $( this.element ).find( 'li' ).removeClass( 'sortable-tree-is-selected sortable-tree-is-target sortable-tree-is-source sortable-tree-is-disabled' );
-        }
         
         return S;
     }
