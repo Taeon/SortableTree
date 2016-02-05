@@ -136,25 +136,31 @@
                 $( source ).addClass( 'sortable-tree-is-selected' );
 
                 // Create clones
+				var show_before = !( $( this.current_item ).next().is( source ) );
+				var show_after = !( $( this.current_item ).prev().is( source ) );
 
 				// Insert before
-				var clone_before = this.current_item.clone();
-				clone_before.addClass( 'sortable-tree-item-clone before' ).removeClass( 'sortable-tree-is-source' ).insertBefore(source);
-				clone_before.find( '.sortable-tree-button.select' ).on( this.o.ev, $.proxy( this.InsertBefore, this ) );
+				if ( show_before ) {
+					var clone_before = this.current_item.clone();
+					clone_before.addClass( 'sortable-tree-item-clone before' ).removeClass( 'sortable-tree-is-source' ).insertBefore(source);
+					clone_before.find( '.sortable-tree-button.select' ).on( this.o.ev, $.proxy( this.InsertBefore, this ) );
+				}
 
 				// Insert after
-				var clone_after = this.current_item.clone();
-				clone_after.addClass( 'sortable-tree-item-clone after' ).removeClass( 'sortable-tree-is-source' ).insertAfter(source);
-				clone_after.find( '.sortable-tree-button.select' ).on( this.o.ev, $.proxy( this.InsertAfter, this ) );
+				if ( show_after ) {
+					var clone_after = this.current_item.clone();
+					clone_after.addClass( 'sortable-tree-item-clone after' ).removeClass( 'sortable-tree-is-source' ).insertAfter(source);
+					clone_after.find( '.sortable-tree-button.select' ).on( this.o.ev, $.proxy( this.InsertAfter, this ) );
+				}
 				
 				// Insert as child
                 if( this.o.nestable && !( source[0] == this.GetParent(this.current_item) ) ){
-					var clone_child = this.current_item.clone();
-					clone_child.find( '.sortable-tree-button.select' ).on( this.o.ev, $.proxy( this.InsertAsChild, this ) );
 					if ( $( source ).find( '> ul' ).length == 0 ) {
+					var clone_child = this.current_item.clone();
+						clone_child.find( '.sortable-tree-button.select' ).on( this.o.ev, $.proxy( this.InsertAsChild, this ) );
 						$( source ).append( '<ul class="sortable-tree-children-clone"></ul>' );
+						clone_child.addClass( 'sortable-tree-item-clone after' ).removeClass( 'sortable-tree-is-source' ).appendTo($( source ).find( '> ul' ));
 					}
-					clone_child.addClass( 'sortable-tree-item-clone after' ).removeClass( 'sortable-tree-is-source' ).appendTo($( source ).find( '> ul' ));
                 };
 				
 				this.trigger( 'target-selected', {tree:this, item:this.current_item,target:source} );
