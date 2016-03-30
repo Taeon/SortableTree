@@ -37,6 +37,32 @@
     this,
     function () {
 
+		var Setup = function( tree_object ){
+            $( tree_object.element ).addClass( 'sortable-tree-list' );
+			if ( tree_object.o.nestable ) {
+				$( tree_object.element ).addClass( 'sortable-tree-nestable' );
+			}
+			
+            var items = $(tree_object.element).find( 'li' );
+
+            for ( var i = 0; i < items.length; i++ ) {
+                // Create button
+                var button = $('<div class="sortable-tree-button select">Move</div>');
+
+                // Prepend button to element
+				if ( tree_object.o.button_target !== false ) {
+	                $( items[ i ] ).find( tree_object.o.button_target ).prepend( button );
+				} else {
+
+	                $( items[ i ] ).prepend( button );					
+				}
+            }
+
+            // Bind click event
+            $( items ).addClass( 'sortable-tree-item' );
+            $( tree_object.element ).find( '.sortable-tree-button.select' ).on( tree_object.o.ev, $.proxy( tree_object.SelectClick, tree_object ) );
+			
+		}
         var ClearUp = function( tree_object ){
 			$( tree_object.element ).find( '.sortable-tree-item-clone,.sortable-tree-children-clone ' ).remove();
             $( tree_object.element ).find( 'li' ).removeClass( 'sortable-tree-is-selected sortable-tree-is-target sortable-tree-is-source sortable-tree-is-disabled' );
@@ -57,26 +83,9 @@
             
             this.element = $(element)[0];
 
-			if ( this.o.nestable ) {
-				$( this.element ).addClass( 'sortable-tree-nestable' );
-			}
-			
             var el = this.element;
             
-            $( el ).addClass( 'sortable-tree-list' );
-            var items = $(this.element).find( 'li' );
-
-            for ( var i = 0; i < items.length; i++ ) {
-                // Create button
-                var button = $('<div class="sortable-tree-button select">Move</div>');
-
-                // Prepend button to element
-                $( items[ i ] ).find( this.o.button_target ).prepend( button );
-            }
-
-            // Bind click event
-            $( items ).addClass( 'sortable-tree-item' );
-            $( this.element ).find( '.sortable-tree-button.select' ).on( this.o.ev, $.proxy( this.SelectClick, this ) );
+			Setup( this );
             
             var target = this.element;
             
@@ -114,9 +123,20 @@
                     }
                 );
                 dispatch(evt);
-            }            
+            }
         }
         
+		S.prototype.Reload = function(){
+			this.Destroy();
+			Setup( this );
+		}
+		S.prototype.Destroy = function(){
+			ClearUp( this );
+			$( this.element ).removeClass( 'sortable-tree-nestable sortable-tree-list' );
+			$( this.element ).find( '.sortable-tree-button' ).remove();
+			$( this.element ).find( '.sortable-tree-item' ).removeClass( 'sortable-tree-item' );
+		}
+		
         S.prototype.SelectClick = function( event ){
             var source = $( event.target ).closest( '.sortable-tree-item' );
             
