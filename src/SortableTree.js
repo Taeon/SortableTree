@@ -175,10 +175,12 @@
 				
 				// Insert as child
                 if( this.o.nestable && !( source[0] == this.GetParent(this.current_item) ) ){
-					if ( $( source ).find( '> ul' ).length == 0 ) {
-					var clone_child = this.current_item.clone();
+					if ( $( source ).find( '> ul' ).length == 0 || $( source ).find( '> ul > li' ).length == 0 ) {
+						var clone_child = this.current_item.clone();
 						clone_child.find( '.sortable-tree-button.select' ).on( this.o.ev, $.proxy( this.InsertAsChild, this ) );
-						$( source ).append( '<ul class="sortable-tree-children-clone"></ul>' );
+						if ( $( source ).find( '> ul' ).length == 0 ) {
+							$( source ).append( '<ul class="sortable-tree-children-clone"></ul>' );
+						}
 						clone_child.addClass( 'sortable-tree-item-clone after' ).removeClass( 'sortable-tree-is-source' ).appendTo($( source ).find( '> ul' ));
 					}
                 };
