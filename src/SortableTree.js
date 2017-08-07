@@ -6,17 +6,17 @@
  * The MIT License (MIT)
  *
  * Copyright (c) 2015 Patrick Fox
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -42,8 +42,8 @@
 			if ( tree_object.o.nestable ) {
 				$( tree_object.element ).addClass( 'sortable-tree-nestable' );
 			}
-			
-            var items = $(tree_object.element).find( 'li' );
+
+            var items = $(tree_object.element).find( 'li:not(.sortable-tree-fixed)' );
 
             for ( var i = 0; i < items.length; i++ ) {
                 // Create button
@@ -54,14 +54,14 @@
 	                $( items[ i ] ).find( tree_object.o.button_target ).prepend( button );
 				} else {
 
-	                $( items[ i ] ).prepend( button );					
+	                $( items[ i ] ).prepend( button );
 				}
             }
 
             // Bind click event
             $( items ).addClass( 'sortable-tree-item' );
             $( tree_object.element ).find( '.sortable-tree-button.select' ).on( tree_object.o.ev, $.proxy( tree_object.SelectClick, tree_object ) );
-			
+
 		}
         var ClearUp = function( tree_object ){
 			$( tree_object.element ).find( '.sortable-tree-item-clone,.sortable-tree-children-clone ' ).remove();
@@ -80,20 +80,20 @@
             for ( index in option ) {
 				this.o[ index ] = option[index];
 			}
-            
+
             this.element = $(element)[0];
 
             var el = this.element;
-            
+
 			Setup( this );
-            
+
             var target = this.element;
-            
+
             this.on = target.addEventListener.bind(target);
             this.off = target.removeEventListener.bind(target);
             var dispatch = target.dispatchEvent.bind(target);
             this.trigger = function( event_type, params ){
-                
+
                 var detail = {};
                 var bubbles = false;
                 var cancelable = false;
@@ -113,7 +113,7 @@
                         }
                     }
                 }
-                
+
                 var evt = new CustomEvent(
                     event_type,
                     {
@@ -125,7 +125,7 @@
                 dispatch(evt);
             }
         }
-        
+
 		S.prototype.Reload = function(){
 			this.Destroy();
 			Setup( this );
@@ -136,18 +136,18 @@
 			$( this.element ).find( '.sortable-tree-button' ).remove();
 			$( this.element ).find( '.sortable-tree-item' ).removeClass( 'sortable-tree-item' );
 		}
-		
+
         S.prototype.SelectClick = function( event ){
             var source = $( event.target ).closest( '.sortable-tree-item' );
-            
+
 			if ( source.hasClass( 'sortable-tree-is-disabled' ) ) {
 				this.trigger( 'selected-item-is-disabled' );
 				return;
 			}
-			
+
             if ( source.hasClass( 'sortable-tree-is-target' ) ) {
                 // Select item to be moved next to
-            
+
                 // Reset, in case you're clicking another element after already having selected one
                 $( this.element ).find( '.sortable-tree-item' ).removeClass( 'sortable-tree-is-selected' );
 				$( this.element ).find( '.sortable-tree-item-clone,.sortable-tree-children-clone ' ).remove();
@@ -172,7 +172,7 @@
 					clone_after.addClass( 'sortable-tree-item-clone after' ).removeClass( 'sortable-tree-is-source' ).insertAfter(source);
 					clone_after.find( '.sortable-tree-button.select' ).on( this.o.ev, $.proxy( this.InsertAfter, this ) );
 				}
-				
+
 				// Insert as child
                 if( this.o.nestable && !( source[0] == this.GetParent(this.current_item) ) ){
 					if ( $( source ).find( '> ul' ).length == 0 || $( source ).find( '> ul > li' ).length == 0 ) {
@@ -184,7 +184,7 @@
 						clone_child.addClass( 'sortable-tree-item-clone after' ).removeClass( 'sortable-tree-is-source' ).appendTo($( source ).find( '> ul' ));
 					}
                 };
-				
+
 				this.trigger( 'target-selected', {tree:this, item:this.current_item,target:source} );
             } else if( source.hasClass( 'sortable-tree-is-source' ) ) {
                 // Cancel move
@@ -192,7 +192,7 @@
                 this.trigger( 'cancelled', {tree:this, item:this.current_item} );
             } else {
 				// Select item to be moved
-				
+
                 // Add class to all elements
                 $( this.element ).find( '.sortable-tree-item' ).addClass( 'sortable-tree-is-target' );
 				// Remove from current element
@@ -203,7 +203,7 @@
                 this.trigger( 'source-selected', {tree:this, item:this.current_item} );
 			}
         }
-        
+
         S.prototype.InsertAfter = function( event ){
             this.current_item.insertAfter( $( this.element ).find( '.sortable-tree-is-selected' ) );
 			ClearUp( this );
@@ -294,7 +294,7 @@
 			}
 			return parent_list;
 		}
-        
+
         return S;
     }
 ));
